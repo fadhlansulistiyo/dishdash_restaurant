@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../data/restaurant.dart';
 
 class MenuList extends StatelessWidget {
