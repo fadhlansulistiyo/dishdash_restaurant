@@ -26,6 +26,14 @@ class Restaurant {
       };
 }
 
+List<RestaurantElement> parseRestaurants(String? json) {
+  if (json == null) {
+    return [];
+  }
+  final parsed = jsonDecode(json)["restaurants"] as List;
+  return parsed.map((json) => RestaurantElement.fromJson(json)).toList();
+}
+
 class RestaurantElement {
   String id;
   String name;
