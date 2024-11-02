@@ -1,5 +1,6 @@
+/*
 import 'package:flutter/material.dart';
-import '../data/restaurant.dart';
+import '../data/local/restaurant.dart';
 
 class MenuList extends StatelessWidget {
   final List<Drink> menu;
@@ -35,3 +36,4 @@ class MenuList extends StatelessWidget {
     );
   }
 }
+*/

@@ -1,3 +1,4 @@
+/*
 // To parse this JSON data, do
 //
 //     final restaurant = restaurantFromJson(jsonString);
@@ -110,3 +111,4 @@ class Drink {
         "name": name,
       };
 }
+*/

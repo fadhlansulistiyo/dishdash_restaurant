@@ -1,8 +1,10 @@
-import 'package:dishdash_restaurant/data/restaurant.dart';
-import 'package:dishdash_restaurant/ui/detail_screen.dart';
+import 'package:dishdash_restaurant/ui/restaurant_item.dart';
 import 'package:dishdash_restaurant/widgets/platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/restaurant_provider.dart';
+import '../provider/result_state.dart';
 
 class RestaurantList extends StatelessWidget {
   const RestaurantList({super.key});
@@ -17,7 +19,7 @@ class RestaurantList extends StatelessWidget {
       appBar: AppBar(
         title: const Text('DishDash Restaurant'),
       ),
-      body: _buildList(context),
+      body: _buildList(),
     );
   }
 
@@ -27,10 +29,51 @@ class RestaurantList extends StatelessWidget {
         middle: Text('DishDash Restaurant'),
         transitionBetweenRoutes: false,
       ),
-      child: _buildList(context),
+      child: _buildList(),
     );
   }
 
+  Widget _buildList() {
+    return Consumer<RestaurantProvider>(
+      builder: (context, state, _) {
+        if (state.state == ResultState.loading) {
+          return const Center(child: CircularProgressIndicator(
+            color: Colors.blue,
+          ));
+        } else if (state.state == ResultState.hasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: state.result.restaurants.length,
+            itemBuilder: (context, index) {
+              var restaurant = state.result.restaurants[index];
+              return RestaurantItem(restaurant: restaurant);
+            },
+          );
+        } else if (state.state == ResultState.noData) {
+          return Center(
+            child: Material(
+              child: Text(state.message),
+            ),
+          );
+        } else if (state.state == ResultState.error) {
+          return Center(
+            child: Material(
+              child: Text(state.message),
+            ),
+          );
+        } else {
+          return const Center(
+            child: Material(
+              child: Text(''),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  // Future _buildList
+/*
   FutureBuilder<String> _buildList(BuildContext context) {
     return FutureBuilder<String>(
       future: DefaultAssetBundle.of(context)
@@ -46,103 +89,12 @@ class RestaurantList extends StatelessWidget {
           return ListView.builder(
             itemCount: restaurants.length,
             itemBuilder: (context, index) {
-              return _buildRestaurantItem(context, restaurants[index]);
+              return restaurantItem(context, restaurants[index]);
             },
           );
         }
       },
     );
   }
-
-  Widget _buildRestaurantItem(
-      BuildContext context, RestaurantElement restaurant) {
-    return InkWell(
-      onTap: () {
-        Navigator.pushNamed(
-          context,
-          RestaurantDetailScreen.routeName,
-          arguments: restaurant,
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          top: 8.0,
-          bottom: 8.0
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Card(
-              elevation: 4.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: Hero(
-                tag: restaurant.pictureId,
-                child: Image.network(
-                  restaurant.pictureId,
-                  width: 150,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8.0),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    restaurant.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8.0),
-                  _restaurantInfo(restaurant),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Column _restaurantInfo(RestaurantElement restaurant) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.location_on,
-              color: Colors.red,
-              size: 16,
-            ),
-            const SizedBox(width: 4),
-            Text(restaurant.city),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Row(
-          children: [
-            const Icon(
-              Icons.star,
-              color: Colors.orange,
-              size: 16,
-            ),
-            const SizedBox(width: 4),
-            Text('${restaurant.rating}'),
-          ],
-        ),
-      ],
-    );
-  }
+*/
 }

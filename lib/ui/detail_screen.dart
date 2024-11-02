@@ -1,10 +1,11 @@
-import 'package:dishdash_restaurant/data/restaurant.dart';
-import 'package:dishdash_restaurant/ui/menu_list.dart';
 import 'package:flutter/material.dart';
+
+import '../data/api/restaurant_result.dart';
 
 class RestaurantDetailScreen extends StatelessWidget {
   static const routeName = '/restaurant_detail';
-  final RestaurantElement restaurant;
+  final Restaurant restaurant;
+  final _baseImage = 'https://restaurant-api.dicoding.dev/images/large/';
 
   const RestaurantDetailScreen({super.key, required this.restaurant});
 
@@ -34,10 +35,6 @@ class RestaurantDetailScreen extends StatelessWidget {
                   const SizedBox(height: 8.0),
                   _buildDescription(),
                   const SizedBox(height: 16.0),
-                  _buildSectionTitle('Menus'),
-                  const Divider(height: 8.0),
-                  _buildMenuSection('Foods', restaurant.menus.foods),
-                  _buildMenuSection('Drinks', restaurant.menus.drinks),
                 ],
               ),
             ),
@@ -50,7 +47,7 @@ class RestaurantDetailScreen extends StatelessWidget {
   Widget _buildHeroImage() {
     return Hero(
       tag: restaurant.pictureId,
-      child: Image.network(restaurant.pictureId),
+      child: Image.network("$_baseImage${restaurant.pictureId}"),
     );
   }
 
@@ -112,21 +109,6 @@ class RestaurantDetailScreen extends StatelessWidget {
     return Text(
       restaurant.description,
       style: const TextStyle(fontSize: 14.0),
-    );
-  }
-
-  Widget _buildMenuSection(String title, List<Drink> menuItems) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 16),
-        ),
-        const SizedBox(height: 8.0),
-        MenuList(menu: menuItems),
-        const SizedBox(height: 8.0),
-      ],
     );
   }
 }
