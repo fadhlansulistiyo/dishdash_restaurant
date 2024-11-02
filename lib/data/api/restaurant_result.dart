@@ -12,69 +12,67 @@ String restaurantResultToJson(RestaurantResult data) =>
 
 class RestaurantResult {
   bool error;
-  String message;
+  String? message;
   int count;
   List<Restaurant> restaurants;
 
   RestaurantResult({
     required this.error,
-    required this.message,
+    this.message,
     required this.count,
     required this.restaurants,
   });
 
-  factory RestaurantResult.fromJson(Map<String, dynamic> json) =>
-      RestaurantResult(
-        error: json["error"],
-        message: json["message"],
-        count: json["count"],
-        restaurants: List<Restaurant>.from(
-            json["restaurants"].map((x) => Restaurant.fromJson(x))),
-      );
+  factory RestaurantResult.fromJson(Map<String, dynamic> json) => RestaurantResult(
+    error: json["error"] as bool,
+    message: json["message"] as String? ?? 'No message',
+    count: json["count"] as int? ?? 0,
+    restaurants: (json["restaurants"] as List<dynamic>?)
+        ?.map((x) => Restaurant.fromJson(x as Map<String, dynamic>))
+        .toList() ??
+        [],
+  );
 
-  Map<String, dynamic> toJson() =>
-      {
-        "error": error,
-        "message": message,
-        "count": count,
-        "restaurants": List<dynamic>.from(restaurants.map((x) => x.toJson())),
-      };
+  Map<String, dynamic> toJson() => {
+    "error": error,
+    "message": message,
+    "count": count,
+    "restaurants": restaurants.map((x) => x.toJson()).toList(),
+  };
 }
 
 class Restaurant {
-  String id;
-  String name;
-  String description;
-  String pictureId;
-  String city;
-  double rating;
+  String? id;
+  String? name;
+  String? description;
+  String? pictureId;
+  String? city;
+  double? rating;
 
   Restaurant({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.pictureId,
-    required this.city,
-    required this.rating,
+    this.id,
+    this.name,
+    this.description,
+    this.pictureId,
+    this.city,
+    this.rating,
   });
 
-  factory Restaurant.fromJson(Map<String, dynamic> json) =>
-      Restaurant(
-        id: json["id"],
-        name: json["name"],
-        description: json["description"],
-        pictureId: json["pictureId"],
-        city: json["city"],
-        rating: json["rating"]?.toDouble(),
-      );
+  factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
+    id: json["id"] as String? ?? '',
+    name: json["name"] as String? ?? '',
+    description: json["description"] as String? ?? '',
+    pictureId: json["pictureId"] as String? ?? '',
+    city: json["city"] as String? ?? '',
+    rating: (json["rating"] as num?)?.toDouble() ?? 0.0,
+  );
 
-  Map<String, dynamic> toJson() =>
-      {
-        "id": id,
-        "name": name,
-        "description": description,
-        "pictureId": pictureId,
-        "city": city,
-        "rating": rating,
-      };
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "description": description,
+    "pictureId": pictureId,
+    "city": city,
+    "rating": rating,
+  };
 }

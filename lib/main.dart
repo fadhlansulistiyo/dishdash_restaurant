@@ -1,4 +1,3 @@
-import 'package:dishdash_restaurant/data/local/restaurant.dart';
 import 'package:dishdash_restaurant/ui/detail_screen.dart';
 import 'package:dishdash_restaurant/ui/home_screen.dart';
 import 'package:flutter/material.dart';

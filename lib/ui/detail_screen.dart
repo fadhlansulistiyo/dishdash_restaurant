@@ -13,7 +13,7 @@ class RestaurantDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(restaurant.name),
+        title: Text(restaurant.name ?? "NA"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -46,7 +46,7 @@ class RestaurantDetailScreen extends StatelessWidget {
 
   Widget _buildHeroImage() {
     return Hero(
-      tag: restaurant.pictureId,
+      tag: restaurant.pictureId ?? "",
       child: Image.network(
         "$_baseImage${restaurant.pictureId}",
         errorBuilder: (context, error, stackTrace) {
@@ -70,7 +70,7 @@ class RestaurantDetailScreen extends StatelessWidget {
 
   Widget _buildTitle() {
     return Text(
-      restaurant.name,
+      restaurant.name ?? "NA",
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 24,
@@ -88,7 +88,7 @@ class RestaurantDetailScreen extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          restaurant.city,
+          restaurant.city ?? "NA",
           style: const TextStyle(fontSize: 16.0),
         ),
       ],
@@ -105,7 +105,7 @@ class RestaurantDetailScreen extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${restaurant.rating}',
+          '${restaurant.rating ?? 0.0}',
           style: TextStyle(color: Colors.grey[700]),
         ),
       ],
@@ -124,7 +124,7 @@ class RestaurantDetailScreen extends StatelessWidget {
 
   Widget _buildDescription() {
     return Text(
-      restaurant.description,
+      restaurant.description ?? "NA",
       style: const TextStyle(fontSize: 14.0),
     );
   }

@@ -31,7 +31,7 @@ class RestaurantItem extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: Hero(
-                tag: restaurant.pictureId,
+                tag: restaurant.pictureId ?? "",
                 child: Image.network(
                   "$_baseImage${restaurant.pictureId}",
                   width: 150,
@@ -70,7 +70,7 @@ class RestaurantItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    restaurant.name,
+                    restaurant.name ?? "NA",
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -101,7 +101,7 @@ class RestaurantItem extends StatelessWidget {
               size: 16,
             ),
             const SizedBox(width: 4),
-            Text(restaurant.city),
+            Text(restaurant.city ?? "NA"),
           ],
         ),
         const SizedBox(height: 4),
@@ -113,7 +113,7 @@ class RestaurantItem extends StatelessWidget {
               size: 16,
             ),
             const SizedBox(width: 4),
-            Text('${restaurant.rating}'),
+            Text('${restaurant.rating ?? 0.0}'),
           ],
         ),
       ],
