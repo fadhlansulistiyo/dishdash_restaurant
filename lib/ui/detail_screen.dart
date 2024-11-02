@@ -47,7 +47,24 @@ class RestaurantDetailScreen extends StatelessWidget {
   Widget _buildHeroImage() {
     return Hero(
       tag: restaurant.pictureId,
-      child: Image.network("$_baseImage${restaurant.pictureId}"),
+      child: Image.network(
+        "$_baseImage${restaurant.pictureId}",
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            Icons.broken_image,
+            size: 100,
+            color: Colors.grey,
+          );
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
     );
   }
 

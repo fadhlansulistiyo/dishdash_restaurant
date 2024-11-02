@@ -20,11 +20,7 @@ class RestaurantItem extends StatelessWidget {
       },
       child: Padding(
         padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            top: 8.0,
-            bottom: 8.0
-        ),
+            left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -41,6 +37,30 @@ class RestaurantItem extends StatelessWidget {
                   width: 150,
                   height: 100,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 150,
+                      height: 100,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.broken_image,
+                        size: 50,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) {
+                      return child;
+                    }
+                    return const SizedBox(
+                      width: 150,
+                      height: 100,
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -100,4 +120,3 @@ class RestaurantItem extends StatelessWidget {
     );
   }
 }
-

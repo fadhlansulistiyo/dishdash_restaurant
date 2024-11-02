@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'DishDash Restaurant',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       initialRoute: HomeScreen.routeName,
       routes: {
