@@ -1,54 +1,100 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
 import '../data/api/restaurant_result.dart';
+import '../provider/restaurant_detail_provider.dart';
+import '../provider/result_state.dart';
 
-class RestaurantDetailScreen extends StatelessWidget {
+class RestaurantDetailScreen extends StatefulWidget {
   static const routeName = '/restaurant_detail';
   final Restaurant restaurant;
-  final _baseImage = 'https://restaurant-api.dicoding.dev/images/large/';
 
   const RestaurantDetailScreen({super.key, required this.restaurant});
+
+  @override
+  State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
+}
+
+class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
+  final _baseImage = 'https://restaurant-api.dicoding.dev/images/large/';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<RestaurantDetailProvider>(context, listen: false);
+      provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(restaurant.name ?? "NA"),
+        title: Text(widget.restaurant.name ?? ""),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeroImage(),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: Consumer<RestaurantDetailProvider>(
+        builder: (context, provider, _) {
+          if (provider.state == ResultState.loading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (provider.state == ResultState.error) {
+            return _buildError(provider.message, provider);
+          } else if (provider.state == ResultState.hasData) {
+            final restaurantDetail = provider.restaurantDetail;
+            return SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTitle(),
-                  const SizedBox(height: 8.0),
-                  _buildLocationRow(),
-                  const SizedBox(height: 4),
-                  _buildRatingRow(),
-                  const Divider(height: 32.0),
-                  _buildSectionTitle('Description'),
-                  const SizedBox(height: 8.0),
-                  _buildDescription(),
-                  const SizedBox(height: 16.0),
+                  _buildHeroImage(restaurantDetail.pictureId),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitle(restaurantDetail.name),
+                        const SizedBox(height: 8.0),
+                        _buildLocationRow(restaurantDetail.city, restaurantDetail.address),
+                        const SizedBox(height: 4),
+                        _buildRatingRow(restaurantDetail.rating),
+                        const Divider(height: 32.0),
+                        _buildSectionTitle('Description'),
+                        const SizedBox(height: 8.0),
+                        _buildDescription(restaurantDetail.description),
+                        const SizedBox(height: 16.0),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
-        ),
+            );
+          } else {
+            return const Center(child: Text('No details available'));
+          }
+        },
       ),
     );
   }
 
-  Widget _buildHeroImage() {
+  Widget _buildError(String message, RestaurantDetailProvider provider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(message),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => provider.fetchRestaurantDetail(widget.restaurant.id ?? ""),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeroImage(String pictureId) {
     return Hero(
-      tag: restaurant.pictureId ?? "",
+      tag: pictureId,
       child: Image.network(
-        "$_baseImage${restaurant.pictureId}",
+        "$_baseImage$pictureId",
         errorBuilder: (context, error, stackTrace) {
           return const Icon(
             Icons.broken_image,
@@ -60,17 +106,15 @@ class RestaurantDetailScreen extends StatelessWidget {
           if (loadingProgress == null) {
             return child;
           }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(String name) {
     return Text(
-      restaurant.name ?? "NA",
+      name,
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 24,
@@ -78,7 +122,7 @@ class RestaurantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLocationRow() {
+  Widget _buildLocationRow(String city, address) {
     return Row(
       children: [
         const Icon(
@@ -88,14 +132,14 @@ class RestaurantDetailScreen extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          restaurant.city ?? "NA",
+          "$address, $city",
           style: const TextStyle(fontSize: 16.0),
         ),
       ],
     );
   }
 
-  Widget _buildRatingRow() {
+  Widget _buildRatingRow(double rating) {
     return Row(
       children: [
         const Icon(
@@ -105,7 +149,7 @@ class RestaurantDetailScreen extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${restaurant.rating ?? 0.0}',
+          '$rating',
           style: TextStyle(color: Colors.grey[700]),
         ),
       ],
@@ -122,9 +166,9 @@ class RestaurantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(String description) {
     return Text(
-      restaurant.description ?? "NA",
+      description,
       style: const TextStyle(fontSize: 14.0),
     );
   }
