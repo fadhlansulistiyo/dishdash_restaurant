@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/api/restaurant_detail.dart';
 import '../data/api/restaurant_result.dart';
 import '../provider/restaurant_detail_provider.dart';
 import '../provider/result_state.dart';
+import 'menu_list.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   static const routeName = '/restaurant_detail';
@@ -21,7 +23,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<RestaurantDetailProvider>(context, listen: false);
+      final provider =
+          Provider.of<RestaurantDetailProvider>(context, listen: false);
       provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
     });
   }
@@ -40,36 +43,45 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             return _buildError(provider.message, provider);
           } else if (provider.state == ResultState.hasData) {
             final restaurantDetail = provider.restaurantDetail;
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeroImage(restaurantDetail.pictureId),
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTitle(restaurantDetail.name),
-                        const SizedBox(height: 8.0),
-                        _buildLocationRow(restaurantDetail.city, restaurantDetail.address),
-                        const SizedBox(height: 4),
-                        _buildRatingRow(restaurantDetail.rating),
-                        const Divider(height: 32.0),
-                        _buildSectionTitle('Description'),
-                        const SizedBox(height: 8.0),
-                        _buildDescription(restaurantDetail.description),
-                        const SizedBox(height: 16.0),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
+            return _buildDetailScreen(restaurantDetail);
           } else {
             return const Center(child: Text('No details available'));
           }
         },
+      ),
+    );
+  }
+
+  SingleChildScrollView _buildDetailScreen(RestaurantDetail restaurantDetail) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildHeroImage(restaurantDetail.pictureId),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTitle(restaurantDetail.name),
+                const SizedBox(height: 8.0),
+                _buildLocationRow(
+                    restaurantDetail.city, restaurantDetail.address),
+                const SizedBox(height: 4),
+                _buildRatingRow(restaurantDetail.rating),
+                const Divider(height: 32.0),
+                _buildSectionTitle('Description'),
+                const SizedBox(height: 8.0),
+                _buildDescription(restaurantDetail.description),
+                const SizedBox(height: 16.0),
+                _buildSectionTitle('Menus'),
+                const Divider(height: 8.0),
+                _buildMenuSection('Foods', restaurantDetail.menus.foods),
+                _buildMenuSection('Drinks', restaurantDetail.menus.drinks),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -82,7 +94,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           Text(message),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () => provider.fetchRestaurantDetail(widget.restaurant.id ?? ""),
+            onPressed: () =>
+                provider.fetchRestaurantDetail(widget.restaurant.id ?? ""),
             child: const Text('Retry'),
           ),
         ],
@@ -170,6 +183,21 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Text(
       description,
       style: const TextStyle(fontSize: 14.0),
+    );
+  }
+
+  Widget _buildMenuSection(String title, List<Category> menuItems) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16),
+        ),
+        const SizedBox(height: 8.0),
+        MenuList(menu: menuItems),
+        const SizedBox(height: 8.0),
+      ],
     );
   }
 }
