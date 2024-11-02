@@ -78,6 +78,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 const Divider(height: 8.0),
                 _buildMenuSection('Foods', restaurantDetail.menus.foods),
                 _buildMenuSection('Drinks', restaurantDetail.menus.drinks),
+                const SizedBox(height: 16.0),
+                _buildSectionTitle('Reviews'),
+                const Divider(height: 8.0),
+                _buildReviewList(restaurantDetail)
               ],
             ),
           ),
@@ -198,6 +202,33 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         MenuList(menu: menuItems),
         const SizedBox(height: 8.0),
       ],
+    );
+  }
+
+  Widget _buildReviewList(RestaurantDetail restaurant) {
+    return Column(
+      children: restaurant.customerReviews.map((review) {
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+          child: ListTile(
+            title: Text(
+              review.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(review.review),
+                const SizedBox(height: 4.0),
+                Text(
+                  review.date,
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }
