@@ -229,7 +229,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               : Colors.grey.withOpacity(0.5),
           elevation:
               Theme.of(context).brightness == Brightness.dark ? 6.0 : 3.0,
-          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0),
           ),
