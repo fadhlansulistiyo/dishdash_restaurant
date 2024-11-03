@@ -7,20 +7,15 @@ import 'package:provider/provider.dart';
 
 import '../data/api/api_service.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   static const routeName = '/home_screen';
 
-  const HomeScreen({super.key});
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
   final Widget _restaurantList = ChangeNotifierProvider<RestaurantProvider>(
     create: (_) => RestaurantProvider(apiService: ApiService()),
     child: const RestaurantList(),
   );
+
+  HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

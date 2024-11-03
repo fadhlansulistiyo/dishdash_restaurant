@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       initialRoute: HomeScreen.routeName,
       routes: {
-        HomeScreen.routeName: (context) => const HomeScreen(),
+        HomeScreen.routeName: (context) => HomeScreen(),
         RestaurantDetailScreen.routeName: (context) => RestaurantDetailScreen(
             restaurant:
                 ModalRoute.of(context)?.settings.arguments as Restaurant)

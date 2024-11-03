@@ -106,6 +106,12 @@ class _RestaurantListState extends State<RestaurantList> {
     final provider = Provider.of<RestaurantProvider>(context, listen: false);
     provider.fetchAllRestaurants();
   }
+
+  @override
+  dispose(){
+    _searchController.dispose();
+    super.dispose();
+  }
 }
 
 

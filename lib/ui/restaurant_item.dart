@@ -7,7 +7,7 @@ import 'detail_screen.dart';
 
 class RestaurantItem extends StatelessWidget {
   final Restaurant restaurant;
-  final _baseImage = 'https://restaurant-api.dicoding.dev/images/small/';
+  final _baseImage = 'https://restaurant-api.dicoding.dev/images/medium/';
 
   const RestaurantItem({super.key, required this.restaurant});
 

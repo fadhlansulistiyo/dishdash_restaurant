@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../data/api/restaurant_detail.dart';
 import '../data/api/restaurant_result.dart';
@@ -17,7 +18,7 @@ class RestaurantDetailScreen extends StatefulWidget {
 }
 
 class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
-  final _baseImage = 'https://restaurant-api.dicoding.dev/images/large/';
+  final _baseImage = 'https://restaurant-api.dicoding.dev/images/medium/';
 
   @override
   void initState() {
@@ -32,60 +33,83 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.restaurant.name ?? ""),
-      ),
-      body: Consumer<RestaurantDetailProvider>(
-        builder: (context, provider, _) {
-          if (provider.state == ResultState.loading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (provider.state == ResultState.error) {
-            return _buildError(provider.message, provider);
-          } else if (provider.state == ResultState.hasData) {
-            final restaurantDetail = provider.restaurantDetail;
-            return _buildDetailScreen(restaurantDetail);
-          } else {
-            return const Center(child: Text('No details available'));
-          }
+      extendBodyBehindAppBar: true,
+      body: NestedScrollView(
+        headerSliverBuilder: (context, isScrolled) {
+          return [
+            SliverAppBar(
+              expandedHeight: 250.0,
+              pinned: true,
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Hero(
+                  tag: widget.restaurant.pictureId ?? "",
+                  child: Image.network(
+                    "$_baseImage${widget.restaurant.pictureId}",
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.broken_image,
+                        size: 100,
+                        color: Colors.grey,
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(child: CircularProgressIndicator());
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ];
         },
+        body: Consumer<RestaurantDetailProvider>(
+          builder: (context, provider, _) {
+            if (provider.state == ResultState.loading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (provider.state == ResultState.error) {
+              return _buildError(provider.message, provider);
+            } else if (provider.state == ResultState.hasData) {
+              final restaurantDetail = provider.restaurantDetail;
+              return _buildDetailScreen(restaurantDetail);
+            } else {
+              return const Center(child: Text('No details available'));
+            }
+          },
+        ),
       ),
     );
   }
 
   SingleChildScrollView _buildDetailScreen(RestaurantDetail restaurantDetail) {
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeroImage(restaurantDetail.pictureId),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitle(restaurantDetail.name),
-                const SizedBox(height: 8.0),
-                _buildLocationRow(
-                    restaurantDetail.city, restaurantDetail.address),
-                const SizedBox(height: 4),
-                _buildRatingRow(restaurantDetail.rating),
-                const Divider(height: 32.0),
-                _buildSectionTitle('Description'),
-                const SizedBox(height: 8.0),
-                _buildDescription(restaurantDetail.description),
-                const SizedBox(height: 16.0),
-                _buildSectionTitle('Menus'),
-                const Divider(height: 8.0),
-                _buildMenuSection('Foods', restaurantDetail.menus.foods),
-                _buildMenuSection('Drinks', restaurantDetail.menus.drinks),
-                const SizedBox(height: 16.0),
-                _buildSectionTitle('Reviews'),
-                const Divider(height: 8.0),
-                _buildReviewList(restaurantDetail)
-              ],
-            ),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildTitle(restaurantDetail.name),
+            const SizedBox(height: 8.0),
+            _buildLocationRow(restaurantDetail.city, restaurantDetail.address),
+            const SizedBox(height: 4),
+            _buildRatingRow(restaurantDetail.rating),
+            const Divider(height: 32.0),
+            _buildSectionTitle('Description'),
+            const SizedBox(height: 8.0),
+            _buildDescription(restaurantDetail.description),
+            const SizedBox(height: 16.0),
+            _buildSectionTitle('Menus'),
+            const Divider(height: 8.0),
+            _buildMenuSection('Foods', restaurantDetail.menus.foods),
+            _buildMenuSection('Drinks', restaurantDetail.menus.drinks),
+            const SizedBox(height: 16.0),
+            _buildSectionTitle('Reviews'),
+            const Divider(height: 8.0),
+            _buildReviewList(restaurantDetail),
+          ],
+        ),
       ),
     );
   }
@@ -107,28 +131,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     );
   }
 
-  Widget _buildHeroImage(String pictureId) {
-    return Hero(
-      tag: pictureId,
-      child: Image.network(
-        "$_baseImage$pictureId",
-        errorBuilder: (context, error, stackTrace) {
-          return const Icon(
-            Icons.broken_image,
-            size: 100,
-            color: Colors.grey,
-          );
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
-      ),
-    );
-  }
-
   Widget _buildTitle(String name) {
     return Text(
       name,
@@ -139,7 +141,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     );
   }
 
-  Widget _buildLocationRow(String city, address) {
+  Widget _buildLocationRow(String city, String address) {
     return Row(
       children: [
         const Icon(
@@ -209,20 +211,42 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Column(
       children: restaurant.customerReviews.map((review) {
         return Card(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey[850]
+              : Colors.white,
+          shadowColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.black.withOpacity(0.5)
+              : Colors.grey.withOpacity(0.5),
+          elevation:
+              Theme.of(context).brightness == Brightness.dark ? 6.0 : 3.0,
           margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
           child: ListTile(
             title: Text(
               review.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+              ),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(review.review),
+                Text(
+                  review.review,
+                  style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyMedium?.color),
+                ),
                 const SizedBox(height: 4.0),
                 Text(
                   review.date,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
+                  ),
                 ),
               ],
             ),
