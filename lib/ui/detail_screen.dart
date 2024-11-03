@@ -338,6 +338,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       try {
         await provider.submitReview(widget.restaurant.id ?? "", name, review);
         message = 'Review submitted successfully!';
+        provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
       } catch (e) {
         message = provider.message;
       }
