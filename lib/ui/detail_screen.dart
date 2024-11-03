@@ -267,7 +267,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   Widget _buildReviewForm() {
     return Card(
-      color: Colors.grey[100],
+      color: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[850]
+          : Colors.white,
+      shadowColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black.withOpacity(0.5)
+          : Colors.grey.withOpacity(0.5),
       margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
@@ -281,25 +286,31 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 8.0),
             TextField(
               controller: _nameController,
+              style: const TextStyle(
+                color: Colors.black
+              ),
               decoration: InputDecoration(
                 labelText: 'Your Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Colors.grey[200],
               ),
             ),
             const SizedBox(height: 12.0),
             TextField(
               controller: _reviewController,
+              style: const TextStyle(
+                  color: Colors.black
+              ),
               decoration: InputDecoration(
                 labelText: 'Your Review',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Colors.grey[200],
               ),
               maxLines: 3,
             ),
