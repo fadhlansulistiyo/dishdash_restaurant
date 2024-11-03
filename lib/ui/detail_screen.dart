@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../data/api/restaurant_detail.dart';
 import '../data/api/restaurant_result.dart';
@@ -19,6 +18,8 @@ class RestaurantDetailScreen extends StatefulWidget {
 
 class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   final _baseImage = 'https://restaurant-api.dicoding.dev/images/medium/';
+  final _nameController = TextEditingController();
+  final _reviewController = TextEditingController();
 
   @override
   void initState() {
@@ -37,37 +38,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       body: NestedScrollView(
         headerSliverBuilder: (context, isScrolled) {
           return [
-            SliverAppBar(
-              expandedHeight: 250.0,
-              pinned: true,
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.transparent,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Hero(
-                  tag: widget.restaurant.pictureId ?? "",
-                  child: Image.network(
-                    "$_baseImage${widget.restaurant.pictureId}",
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.broken_image,
-                        size: 100,
-                        color: Colors.grey,
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                  ),
-                ),
-              ),
-            ),
+            _buildAppBar(),
           ];
         },
         body: Consumer<RestaurantDetailProvider>(
           builder: (context, provider, _) {
-            if (provider.state == ResultState.loading) {
+            if (provider.state == ResultState.loading ||
+                provider.reviewSubmitState == ResultState.loading) {
               return const Center(child: CircularProgressIndicator());
             } else if (provider.state == ResultState.error) {
               return _buildError(provider.message, provider);
@@ -78,6 +55,35 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               return const Center(child: Text('No details available'));
             }
           },
+        ),
+      ),
+    );
+  }
+
+  SliverAppBar _buildAppBar() {
+    return SliverAppBar(
+      expandedHeight: 250.0,
+      pinned: true,
+      foregroundColor: Colors.white,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Hero(
+          tag: widget.restaurant.pictureId ?? "",
+          child: Image.network(
+            "$_baseImage${widget.restaurant.pictureId}",
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(
+                Icons.broken_image,
+                size: 100,
+                color: Colors.grey,
+              );
+            },
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
         ),
       ),
     );
@@ -108,6 +114,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             _buildSectionTitle('Reviews'),
             const Divider(height: 8.0),
             _buildReviewList(restaurantDetail),
+            const SizedBox(height: 32.0),
+            _buildSectionTitle('Submit Your Review'),
+            const Divider(height: 8.0),
+            _buildReviewForm(),
           ],
         ),
       ),
@@ -254,5 +264,104 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
         );
       }).toList(),
     );
+  }
+
+  Widget _buildReviewForm() {
+    return Card(
+      color: Colors.grey[100],
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8.0),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                labelText: 'Your Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12.0),
+            TextField(
+              controller: _reviewController,
+              decoration: InputDecoration(
+                labelText: 'Your Review',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16.0),
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton(
+                onPressed: _submitReview,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 12.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                child: const Text('Submit Review'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submitReview() async {
+    final String name = _nameController.text;
+    final String review = _reviewController.text;
+
+    if (name.isNotEmpty && review.isNotEmpty) {
+      final provider =
+          Provider.of<RestaurantDetailProvider>(context, listen: false);
+
+      String message;
+
+      try {
+        await provider.submitReview(widget.restaurant.id ?? "", name, review);
+        message = 'Review submitted successfully!';
+      } catch (e) {
+        message = provider.message;
+      }
+
+      _nameController.clear();
+      _reviewController.clear();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please fill out both name and review fields.')),
+      );
+    }
+  }
+
+  @override
+  dispose() {
+    _nameController.dispose();
+    _reviewController.dispose();
+    super.dispose();
   }
 }

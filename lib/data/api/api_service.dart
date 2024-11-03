@@ -8,6 +8,7 @@ class ApiService {
   static const String _list = 'list';
   static const String _search = 'search?q=';
   static const String _detail = 'detail/';
+  static const String _review = 'review';
 
   Future<RestaurantResult> getListRestaurant() async {
     final response = await http.get(Uri.parse("$_baseUrl$_list"));
@@ -30,9 +31,28 @@ class ApiService {
   Future<RestaurantDetail> getRestaurantDetail(String id) async {
     final response = await http.get(Uri.parse("$_baseUrl$_detail$id"));
     if (response.statusCode == 200) {
-      return RestaurantDetail.fromJson(json.decode(response.body)["restaurant"]);
+      return RestaurantDetail.fromJson(
+          json.decode(response.body)["restaurant"]);
     } else {
       throw Exception('Failed to load restaurant detail');
+    }
+  }
+
+  Future<void> addReview(String id, String name, String review) async {
+    final response = await http.post(
+      Uri.parse("$_baseUrl$_review"),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        "id": id,
+        "name": name,
+        "review": review,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to add review');
     }
   }
 }
