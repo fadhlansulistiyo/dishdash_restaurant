@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dishdash_restaurant/data/api/restaurant_detail.dart';
 import 'package:dishdash_restaurant/data/api/restaurant_result.dart';
 import 'dart:convert';
@@ -10,12 +12,26 @@ class ApiService {
   static const String _detail = 'detail/';
   static const String _review = 'review';
 
-  Future<RestaurantResult> getListRestaurant() async {
-    final response = await http.get(Uri.parse("$_baseUrl$_list"));
+  RestaurantResult _processResponse(http.Response response) {
     if (response.statusCode == 200) {
       return RestaurantResult.fromJson(json.decode(response.body));
     } else {
-      throw Exception('Failed to load list Restaurant');
+      throw HttpException('Failed with status code ${response.statusCode}');
+    }
+  }
+
+  Future<RestaurantResult> getListRestaurant() async {
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl$_list"));
+      return _processResponse(response);
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on HttpException {
+      throw Exception('Failed to load data');
+    } on FormatException {
+      throw Exception('Invalid data format');
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
     }
   }
 
