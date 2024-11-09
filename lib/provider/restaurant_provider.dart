@@ -12,13 +12,15 @@ class RestaurantProvider extends ChangeNotifier {
   }
 
   late RestaurantResult _restaurantResult;
-  late ResultState _state;
-  String _message = '';
-  String _query = '';
-
-  String get message => _message;
   RestaurantResult get result => _restaurantResult;
+
+  late ResultState _state;
   ResultState get state => _state;
+
+  String _message = '';
+  String get message => _message;
+
+  String _query = '';
   String get query => _query;
 
   Future<void> fetchAllRestaurants() async {
@@ -27,6 +29,7 @@ class RestaurantProvider extends ChangeNotifier {
       notifyListeners();
 
       final restaurant = await apiService.getListRestaurant();
+
       if (restaurant.restaurants.isEmpty) {
         _state = ResultState.noData;
         _message = 'No data available';
