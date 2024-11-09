@@ -1,10 +1,11 @@
-import 'package:dishdash_restaurant/ui/restaurant_item.dart';
+import 'package:dishdash_restaurant/static/restaurant_result_state.dart';
+import 'package:dishdash_restaurant/ui/home/restaurant_item.dart';
 import 'package:dishdash_restaurant/widgets/platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../provider/restaurant_provider.dart';
-import '../provider/result_state.dart';
+import '../../provider/home/restaurant_provider.dart';
+import '../../provider/result_state.dart';
 
 class RestaurantList extends StatefulWidget {
   const RestaurantList({super.key});
@@ -24,9 +25,13 @@ class _RestaurantListState extends State<RestaurantList> {
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DishDash Restaurant'),
+        title: Container(
+          margin: const EdgeInsets.only(top: 16.0),
+          child: const Text('DishDash Restaurant'),
+        ),
+        centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(56.0),
+          preferredSize: const Size.fromHeight(70.0),
           child: _buildSearchField(),
         ),
       ),
@@ -46,7 +51,7 @@ class _RestaurantListState extends State<RestaurantList> {
 
   Widget _buildSearchField() {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
       child: TextField(
         controller: _searchController,
         decoration: const InputDecoration(
@@ -55,7 +60,8 @@ class _RestaurantListState extends State<RestaurantList> {
           border: OutlineInputBorder(),
         ),
         onChanged: (query) {
-          final provider = Provider.of<RestaurantProvider>(context, listen: false);
+          final provider =
+              Provider.of<RestaurantProvider>(context, listen: false);
           provider.searchRestaurants(query);
         },
       ),
@@ -64,24 +70,24 @@ class _RestaurantListState extends State<RestaurantList> {
 
   Widget _buildList() {
     return Consumer<RestaurantProvider>(
-      builder: (context, state, _) {
-        if (state.state == ResultState.loading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state.state == ResultState.hasData) {
-          return ListView.builder(
-            itemCount: state.result.restaurants.length,
-            itemBuilder: (context, index) {
-              var restaurant = state.result.restaurants[index];
-              return RestaurantItem(restaurant: restaurant);
-            },
-          );
-        } else if (state.state == ResultState.noData) {
-          return Center(child: Text(state.message));
-        } else if (state.state == ResultState.error) {
-          return _buildError(state.message);
-        } else {
-          return const Center(child: Text(''));
-        }
+      builder: (context, value, _) {
+        return switch (value.restaurantResultState) {
+          RestaurantListLoadingState() => const Center(
+              child: CircularProgressIndicator(),
+            ),
+          RestaurantListLoadedState(data: var restaurantList) =>
+            ListView.builder(
+              itemCount: restaurantList.length,
+              itemBuilder: (context, index) {
+                final restaurant = restaurantList[index];
+                return RestaurantItem(restaurant: restaurant);
+              },
+            ),
+          RestaurantListErrorState(error: var message) => Center(
+              child: Text(message),
+            ),
+          _ => const SizedBox()
+        };
       },
     );
   }
@@ -108,10 +114,8 @@ class _RestaurantListState extends State<RestaurantList> {
   }
 
   @override
-  dispose(){
+  dispose() {
     _searchController.dispose();
     super.dispose();
   }
 }
-
-

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../data/api/restaurant_detail.dart';
-import '../data/api/restaurant_result.dart';
-import '../provider/restaurant_detail_provider.dart';
-import '../provider/result_state.dart';
+import '../../data/api/restaurant_detail.dart';
+import '../../data/api/restaurant_result.dart';
+import '../../provider/detail/restaurant_detail_provider.dart';
+import '../../provider/result_state.dart';
 import 'menu_list.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {

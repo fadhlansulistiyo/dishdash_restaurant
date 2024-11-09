@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:dishdash_restaurant/provider/result_state.dart';
 import 'package:flutter/material.dart';
-import '../data/api/api_service.dart';
-import '../data/api/restaurant_detail.dart';
+import '../../data/api/api_service.dart';
+import '../../data/api/restaurant_detail.dart';
 
 class RestaurantDetailProvider extends ChangeNotifier {
   final ApiService apiService;

@@ -1,7 +1,8 @@
 import 'package:dishdash_restaurant/data/api/restaurant_result.dart';
 import 'package:dishdash_restaurant/provider/result_state.dart';
+import 'package:dishdash_restaurant/static/restaurant_result_state.dart';
 import 'package:flutter/material.dart';
-import '../data/api/api_service.dart';
+import '../../data/api/api_service.dart';
 import 'dart:io';
 
 class RestaurantProvider extends ChangeNotifier {
@@ -23,27 +24,26 @@ class RestaurantProvider extends ChangeNotifier {
   String _query = '';
   String get query => _query;
 
+  RestaurantListResultState _restaurantResultState = RestaurantListNoneState();
+  RestaurantListResultState get restaurantResultState => _restaurantResultState;
+
   Future<void> fetchAllRestaurants() async {
     try {
-      _state = ResultState.loading;
+      _restaurantResultState = RestaurantListLoadingState();
       notifyListeners();
 
       final restaurant = await apiService.getListRestaurant();
 
-      if (restaurant.restaurants.isEmpty) {
-        _state = ResultState.noData;
-        _message = 'No data available';
+      if (restaurant.error) {
+        _restaurantResultState =
+            RestaurantListErrorState(restaurant.message ?? "Error");
+        notifyListeners();
       } else {
-        _state = ResultState.hasData;
-        _restaurantResult = restaurant;
+        _restaurantResultState = RestaurantListLoadedState(restaurant.restaurants);
+        notifyListeners();
       }
-    } on SocketException {
-      _state = ResultState.error;
-      _message = 'No internet connection';
-    } catch (e) {
-      _state = ResultState.error;
-      _message = 'Failed to load data';
-    } finally {
+    } on Exception catch (e) {
+      _restaurantResultState = RestaurantListErrorState(e.toString());
       notifyListeners();
     }
   }
