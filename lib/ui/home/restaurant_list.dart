@@ -84,7 +84,7 @@ class _RestaurantListState extends State<RestaurantList> {
               },
             ),
           RestaurantListErrorState(error: var message) => Center(
-              child: Text(message),
+              child: _buildError(message),
             ),
           _ => const SizedBox()
         };
