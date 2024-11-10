@@ -1,7 +1,7 @@
-import 'package:dishdash_restaurant/ui/favorite/favorite_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../provider/main/index_nav_provider.dart';
+import 'favorite/favorite_screen.dart';
 import 'home/home_screen.dart';
 
 class MainScreen extends StatelessWidget {

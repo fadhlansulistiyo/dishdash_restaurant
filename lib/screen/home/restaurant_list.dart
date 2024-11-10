@@ -1,10 +1,12 @@
+import 'package:dishdash_restaurant/screen/home/restaurant_item.dart';
+import 'package:dishdash_restaurant/static/navigation_route.dart';
 import 'package:dishdash_restaurant/static/restaurant_result_state.dart';
-import 'package:dishdash_restaurant/ui/home/restaurant_item.dart';
 import 'package:dishdash_restaurant/widgets/platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/home/restaurant_provider.dart';
+import '../detail/restaurant_detail_args.dart';
 
 class RestaurantList extends StatefulWidget {
   const RestaurantList({super.key});
@@ -102,7 +104,22 @@ class _RestaurantListState extends State<RestaurantList> {
               itemCount: restaurantList.length,
               itemBuilder: (context, index) {
                 final restaurant = restaurantList[index];
-                return RestaurantItem(restaurant: restaurant);
+                return RestaurantItem(
+                  pictureId: restaurant.pictureId ?? "",
+                  name: restaurant.name ?? "",
+                  city: restaurant.city ?? "",
+                  rating: restaurant.rating ?? 0.0,
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      NavigationRoute.detailRoute.name,
+                      arguments: RestaurantDetailArguments(
+                          restaurantId: restaurant.id ?? "",
+                          pictureId: restaurant.pictureId ?? ""
+                      ),
+                    );
+                  },
+                );
               },
             ),
           RestaurantListErrorState(error: var message) => Center(

@@ -1,11 +1,7 @@
-import 'package:dishdash_restaurant/provider/home/restaurant_provider.dart';
-import 'package:dishdash_restaurant/ui/home/restaurant_list.dart';
+import 'package:dishdash_restaurant/screen/home/restaurant_list.dart';
 import 'package:dishdash_restaurant/widgets/platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../../data/api/api_service.dart';
 
 class HomeScreen extends StatelessWidget {
 

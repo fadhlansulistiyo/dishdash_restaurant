@@ -1,15 +1,16 @@
+import 'package:dishdash_restaurant/provider/detail/favorite_list_provider.dart';
 import 'package:dishdash_restaurant/provider/detail/restaurant_detail_provider.dart';
 import 'package:dishdash_restaurant/provider/main/index_nav_provider.dart';
 import 'package:dishdash_restaurant/provider/home/restaurant_provider.dart';
+import 'package:dishdash_restaurant/screen/detail/detail_screen.dart';
+import 'package:dishdash_restaurant/screen/detail/restaurant_detail_args.dart';
+import 'package:dishdash_restaurant/screen/main_screen.dart';
 import 'package:dishdash_restaurant/static/navigation_route.dart';
-import 'package:dishdash_restaurant/ui/detail/detail_screen.dart';
-import 'package:dishdash_restaurant/ui/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'common/theme.dart';
 import 'common/util.dart';
 import 'data/api/api_service.dart';
-import 'data/model/restaurant_result.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -27,6 +28,9 @@ void main() {
       ChangeNotifierProvider(
         create: (context) =>
             RestaurantDetailProvider(apiService: context.read<ApiService>()),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => FavoriteListProvider(),
       )
     ],
     child: const MyApp(),
@@ -38,7 +42,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     TextTheme textTheme = createTextTheme(context, "Urbanist", "Urbanist");
 
     MaterialTheme theme = MaterialTheme(textTheme);
@@ -49,9 +52,13 @@ class MyApp extends StatelessWidget {
       initialRoute: NavigationRoute.mainRoute.name,
       routes: {
         NavigationRoute.mainRoute.name: (context) => const MainScreen(),
-        NavigationRoute.detailRoute.name: (context) => RestaurantDetailScreen(
-            restaurant:
-                ModalRoute.of(context)?.settings.arguments as Restaurant)
+        NavigationRoute.detailRoute.name: (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as RestaurantDetailArguments;
+          return RestaurantDetailScreen(
+            restaurantId: args.restaurantId,
+            pictureId: args.pictureId,
+          );
+        }
       },
     );
   }

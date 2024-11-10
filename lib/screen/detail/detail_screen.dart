@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/model/restaurant_detail.dart';
-import '../../data/model/restaurant_result.dart';
 import '../../provider/detail/restaurant_detail_provider.dart';
 import '../../static/restaurant_detail_result_state.dart';
+import '../../provider/detail/favorite_icon_provider.dart';
+import 'favorite_icon_widget.dart';
 import 'menu_list.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   static const routeName = '/restaurant_detail';
-  final Restaurant restaurant;
+  final String restaurantId;
+  final String pictureId;
 
-  const RestaurantDetailScreen({super.key, required this.restaurant});
+  const RestaurantDetailScreen(
+      {super.key, required this.restaurantId, required this.pictureId});
 
   @override
   State<RestaurantDetailScreen> createState() => _RestaurantDetailScreenState();
@@ -27,7 +30,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context
           .read<RestaurantDetailProvider>()
-          .fetchRestaurantDetail(widget.restaurant.id ?? "");
+          .fetchRestaurantDetail(widget.restaurantId);
     });
   }
 
@@ -36,49 +39,32 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: NestedScrollView(
-        headerSliverBuilder: (context, isScrolled) {
-          return [
-            _buildAppBar(),
-          ];
-        },
-        body: Consumer<RestaurantDetailProvider>(
-          builder: (context, value, child) {
-            return switch (value.restaurantDetailState) {
-              RestaurantDetailLoadingState() => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              RestaurantDetailLoadedState(data: var restaurantDetail) =>
-                _buildDetailScreen(restaurantDetail),
-              RestaurantDetailErrorState(error: var message) => Center(
-                  child: _buildError(message, value),
-                ),
-              _ => const SizedBox()
-            };
-          },
-        ),
+        headerSliverBuilder: (context, isScrolled) => [_buildAppBar(context)],
+        body: _buildBody(context),
       ),
     );
   }
 
-  SliverAppBar _buildAppBar() {
+  SliverAppBar _buildAppBar(BuildContext context) {
     return SliverAppBar(
       expandedHeight: 250.0,
       pinned: true,
       foregroundColor: Colors.white,
       backgroundColor: Colors.transparent,
+      actions: [_buildFavoriteIcon(context)],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
-          tag: widget.restaurant.pictureId ?? "",
+          tag: widget.pictureId,
           child: Image.network(
-            "$_baseImage${widget.restaurant.pictureId}",
+            "$_baseImage${widget.pictureId}",
             fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return const Icon(
+            errorBuilder: (context, error, stackTrace) => const Center(
+              child: Icon(
                 Icons.broken_image,
                 size: 100,
                 color: Colors.grey,
-              );
-            },
+              ),
+            ),
             loadingBuilder: (context, child, loadingProgress) {
               if (loadingProgress == null) return child;
               return const Center(child: CircularProgressIndicator());
@@ -86,6 +72,40 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFavoriteIcon(BuildContext context) {
+    return ChangeNotifierProvider(
+      create: (context) => FavoriteIconProvider(),
+      child: Consumer<RestaurantDetailProvider>(
+        builder: (context, value, child) {
+          if (value.restaurantDetailState is RestaurantDetailLoadedState) {
+            final restaurant =
+                (value.restaurantDetailState as RestaurantDetailLoadedState)
+                    .data;
+            return FavoriteIconWidget(restaurantDetail: restaurant);
+          }
+          return const SizedBox();
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context) {
+    return Consumer<RestaurantDetailProvider>(
+      builder: (context, value, child) {
+        switch (value.restaurantDetailState) {
+          case RestaurantDetailLoadingState():
+            return const Center(child: CircularProgressIndicator());
+          case RestaurantDetailLoadedState(data: var restaurantDetail):
+            return _buildDetailScreen(restaurantDetail);
+          case RestaurantDetailErrorState(error: var message):
+            return Center(child: _buildError(message, value));
+          default:
+            return const SizedBox();
+        }
+      },
     );
   }
 
@@ -133,7 +153,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () =>
-                provider.fetchRestaurantDetail(widget.restaurant.id ?? ""),
+                provider.fetchRestaurantDetail(widget.restaurantId),
             child: const Text('Retry'),
           ),
         ],
@@ -342,9 +362,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       String message;
 
       try {
-        await provider.submitReview(widget.restaurant.id ?? "", name, review);
+        await provider.submitReview(widget.restaurantId, name, review);
         message = provider.message;
-        provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
+        provider.fetchRestaurantDetail(widget.restaurantId);
       } catch (e) {
         message = provider.message;
       }

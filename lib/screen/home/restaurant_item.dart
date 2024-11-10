@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../data/api/api_service.dart';
-import '../../data/model/restaurant_result.dart';
-import '../../provider/detail/restaurant_detail_provider.dart';
-import '../../static/navigation_route.dart';
-import '../detail/detail_screen.dart';
 
 class RestaurantItem extends StatelessWidget {
-  final Restaurant restaurant;
+  final String pictureId;
+  final String name;
+  final String city;
+  final double rating;
   final _baseImage = 'https://restaurant-api.dicoding.dev/images/medium/';
+  final Function() onTap;
 
-  const RestaurantItem({super.key, required this.restaurant});
+  const RestaurantItem(
+      {super.key,
+      required this.onTap,
+      required this.pictureId,
+      required this.name,
+      required this.city,
+      required this.rating});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, NavigationRoute.detailRoute.name,
-            arguments: restaurant);
-      },
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.only(
             left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
@@ -32,9 +33,9 @@ class RestaurantItem extends StatelessWidget {
               ),
               clipBehavior: Clip.antiAlias,
               child: Hero(
-                tag: restaurant.pictureId ?? "",
+                tag: pictureId,
                 child: Image.network(
-                  "$_baseImage${restaurant.pictureId}",
+                  "$_baseImage$pictureId",
                   width: 150,
                   height: 100,
                   fit: BoxFit.cover,
@@ -71,7 +72,7 @@ class RestaurantItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    restaurant.name ?? "NA",
+                    name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -102,7 +103,7 @@ class RestaurantItem extends StatelessWidget {
               size: 16,
             ),
             const SizedBox(width: 4),
-            Text(restaurant.city ?? "NA"),
+            Text(city),
           ],
         ),
         const SizedBox(height: 4),
@@ -114,7 +115,7 @@ class RestaurantItem extends StatelessWidget {
               size: 16,
             ),
             const SizedBox(width: 4),
-            Text('${restaurant.rating ?? 0.0}'),
+            Text(rating.toString()),
           ],
         ),
       ],
