@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:dishdash_restaurant/provider/result_state.dart';
 import 'package:flutter/material.dart';
 import '../../data/api/api_service.dart';
 import '../../data/model/restaurant_detail.dart';
@@ -46,7 +44,6 @@ class RestaurantDetailProvider extends ChangeNotifier {
       await fetchRestaurantDetail(id);
 
       notifyListeners();
-
     } on Exception catch (e) {
       _message = 'Error: $e';
     } finally {

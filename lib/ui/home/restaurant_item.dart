@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../data/api/api_service.dart';
 import '../../data/model/restaurant_result.dart';
 import '../../provider/detail/restaurant_detail_provider.dart';
+import '../../static/navigation_route.dart';
 import '../detail/detail_screen.dart';
 
 class RestaurantItem extends StatelessWidget {
@@ -15,16 +16,8 @@ class RestaurantItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChangeNotifierProvider(
-              create: (_) => RestaurantDetailProvider(apiService: ApiService())
-                ..fetchRestaurantDetail(restaurant.id ?? ""),
-              child: RestaurantDetailScreen(restaurant: restaurant),
-            ),
-          ),
-        );
+        Navigator.pushNamed(context, NavigationRoute.detailRoute.name,
+            arguments: restaurant);
       },
       child: Padding(
         padding: const EdgeInsets.only(
