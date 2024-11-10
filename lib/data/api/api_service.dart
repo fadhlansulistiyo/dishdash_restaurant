@@ -1,9 +1,9 @@
 import 'dart:io';
-
-import 'package:dishdash_restaurant/data/api/restaurant_detail.dart';
-import 'package:dishdash_restaurant/data/api/restaurant_result.dart';
+import 'package:dishdash_restaurant/data/model/restaurant_detail.dart';
+import 'package:dishdash_restaurant/data/model/restaurant_result.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../model/restaurant_review.dart';
 
 class ApiService {
   static const String _baseUrl = 'https://restaurant-api.dicoding.dev/';
@@ -12,9 +12,14 @@ class ApiService {
   static const String _detail = 'detail/';
   static const String _review = 'review';
 
-  RestaurantResult _processResponse(http.Response response) {
-    if (response.statusCode == 200) {
-      return RestaurantResult.fromJson(json.decode(response.body));
+  T _processResponse<T>(
+      http.Response response, T Function(Map<String, dynamic>) fromJson) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return fromJson(json.decode(response.body));
+    } else if (response.statusCode == 404) {
+      throw const HttpException('Data not found (404)');
+    } else if (response.statusCode >= 500) {
+      throw const HttpException('Server error (5xx)');
     } else {
       throw HttpException('Failed with status code ${response.statusCode}');
     }
@@ -23,52 +28,74 @@ class ApiService {
   Future<RestaurantResult> getListRestaurant() async {
     try {
       final response = await http.get(Uri.parse("$_baseUrl$_list"));
-      return _processResponse(response);
+      return _processResponse(
+          response, (json) => RestaurantResult.fromJson(json));
     } on SocketException {
       throw Exception('No internet connection');
-    } on HttpException {
-      throw Exception('Failed to load data');
     } on FormatException {
       throw Exception('Invalid data format');
+    } on HttpException catch (e) {
+      throw Exception(e.message);
     } catch (e) {
       throw Exception('Unexpected error: $e');
     }
   }
 
   Future<RestaurantResult> searchRestaurant(String query) async {
-    final response = await http.get(Uri.parse("$_baseUrl$_search$query"));
-    if (response.statusCode == 200) {
-      return RestaurantResult.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load search results');
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl$_search$query"));
+      return _processResponse(
+          response, (json) => RestaurantResult.fromJson(json));
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on FormatException {
+      throw Exception('Invalid data format');
+    } on HttpException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
     }
   }
 
-  Future<RestaurantDetail> getRestaurantDetail(String id) async {
-    final response = await http.get(Uri.parse("$_baseUrl$_detail$id"));
-    if (response.statusCode == 200) {
-      return RestaurantDetail.fromJson(
-          json.decode(response.body)["restaurant"]);
-    } else {
-      throw Exception('Failed to load restaurant detail');
+  Future<RestaurantDetailResult> getRestaurantDetail(String id) async {
+    try {
+      final response = await http.get(Uri.parse("$_baseUrl$_detail$id"));
+      return _processResponse(
+          response, (json) => RestaurantDetailResult.fromJson(json));
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on FormatException {
+      throw Exception('Invalid data format');
+    } on HttpException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
     }
   }
 
-  Future<void> addReview(String id, String name, String review) async {
-    final response = await http.post(
-      Uri.parse("$_baseUrl$_review"),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        "id": id,
-        "name": name,
-        "review": review,
-      }),
-    );
+  Future<Review> addReview(String id, String name, String review) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$_baseUrl$_review"),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          "id": id,
+          "name": name,
+          "review": review,
+        }),
+      );
 
-    if (response.statusCode != 200) {
-      throw Exception('Failed to add review');
+      return _processResponse(response, (json) => Review.fromJson(json));
+    } on SocketException {
+      throw Exception('No internet connection');
+    } on FormatException {
+      throw Exception('Invalid data format');
+    } on HttpException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Unexpected error: $e');
     }
   }
 }

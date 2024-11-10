@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/home/restaurant_provider.dart';
-import '../../provider/result_state.dart';
 
 class RestaurantList extends StatefulWidget {
   const RestaurantList({super.key});
@@ -16,6 +15,7 @@ class RestaurantList extends StatefulWidget {
 
 class _RestaurantListState extends State<RestaurantList> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,15 +25,24 @@ class _RestaurantListState extends State<RestaurantList> {
   Widget _buildAndroid(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          margin: const EdgeInsets.only(top: 16.0),
-          child: const Text('DishDash Restaurant'),
-        ),
+        title: _isSearching
+            ? _buildSearchField()
+            : const Text('DishDash Restaurant'),
         centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(70.0),
-          child: _buildSearchField(),
-        ),
+        actions: [
+          IconButton(
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+            onPressed: () {
+              setState(() {
+                _isSearching = !_isSearching;
+                if (!_isSearching) {
+                  _searchController.clear();
+                  _performSearch('');
+                }
+              });
+            },
+          ),
+        ],
       ),
       body: _buildList(),
     );
@@ -42,30 +51,43 @@ class _RestaurantListState extends State<RestaurantList> {
   Widget _buildIos(BuildContext context) {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('DishDash Restaurant'),
-        trailing: _buildSearchField(),
+        middle: _isSearching
+            ? _buildSearchField()
+            : const Text('DishDash Restaurant'),
+        trailing: GestureDetector(
+          child:
+              Icon(_isSearching ? CupertinoIcons.clear : CupertinoIcons.search),
+          onTap: () {
+            setState(() {
+              _isSearching = !_isSearching;
+              if (!_isSearching) {
+                _searchController.clear();
+                _performSearch('');
+              }
+            });
+          },
+        ),
       ),
       child: _buildList(),
     );
   }
 
   Widget _buildSearchField() {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: TextField(
-        controller: _searchController,
-        decoration: const InputDecoration(
-          hintText: 'Search restaurants...',
-          prefixIcon: Icon(Icons.search),
-          border: OutlineInputBorder(),
-        ),
-        onChanged: (query) {
-          final provider =
-              Provider.of<RestaurantProvider>(context, listen: false);
-          provider.searchRestaurants(query);
-        },
+    return TextField(
+      controller: _searchController,
+      autofocus: true,
+      decoration: const InputDecoration(
+        hintText: 'Search restaurants...',
+        border: InputBorder.none,
       ),
+      onChanged: _performSearch,
+      onSubmitted: _performSearch,
     );
+  }
+
+  void _performSearch(String query) {
+    final provider = Provider.of<RestaurantProvider>(context, listen: false);
+    provider.searchRestaurants(query);
   }
 
   Widget _buildList() {
@@ -114,7 +136,7 @@ class _RestaurantListState extends State<RestaurantList> {
   }
 
   @override
-  dispose() {
+  void dispose() {
     _searchController.dispose();
     super.dispose();
   }

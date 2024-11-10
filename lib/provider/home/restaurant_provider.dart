@@ -1,9 +1,7 @@
-import 'package:dishdash_restaurant/data/api/restaurant_result.dart';
-import 'package:dishdash_restaurant/provider/result_state.dart';
+import 'package:dishdash_restaurant/data/model/restaurant_result.dart';
 import 'package:dishdash_restaurant/static/restaurant_result_state.dart';
 import 'package:flutter/material.dart';
 import '../../data/api/api_service.dart';
-import 'dart:io';
 
 class RestaurantProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -14,12 +12,6 @@ class RestaurantProvider extends ChangeNotifier {
 
   late RestaurantResult _restaurantResult;
   RestaurantResult get result => _restaurantResult;
-
-  late ResultState _state;
-  ResultState get state => _state;
-
-  String _message = '';
-  String get message => _message;
 
   String _query = '';
   String get query => _query;
@@ -37,13 +29,13 @@ class RestaurantProvider extends ChangeNotifier {
       if (restaurant.error) {
         _restaurantResultState =
             RestaurantListErrorState(restaurant.message ?? "Error");
-        notifyListeners();
       } else {
-        _restaurantResultState = RestaurantListLoadedState(restaurant.restaurants);
-        notifyListeners();
+        _restaurantResultState =
+            RestaurantListLoadedState(restaurant.restaurants);
       }
     } on Exception catch (e) {
       _restaurantResultState = RestaurantListErrorState(e.toString());
+    } finally {
       notifyListeners();
     }
   }
@@ -56,23 +48,18 @@ class RestaurantProvider extends ChangeNotifier {
     }
 
     try {
-      _state = ResultState.loading;
+      _restaurantResultState = RestaurantListLoadingState();
       notifyListeners();
 
       final result = await apiService.searchRestaurant(query);
       if (result.restaurants.isEmpty) {
-        _state = ResultState.noData;
-        _message = 'No search results found';
+        _restaurantResultState =
+            RestaurantListErrorState('No search results found');
       } else {
-        _state = ResultState.hasData;
-        _restaurantResult = result;
+        _restaurantResultState = RestaurantListLoadedState(result.restaurants);
       }
-    } on SocketException {
-      _state = ResultState.error;
-      _message = 'No internet connection';
-    } catch (e) {
-      _state = ResultState.error;
-      _message = 'Error --> $e';
+    } on Exception catch (e) {
+      _restaurantResultState = RestaurantListErrorState(e.toString());
     } finally {
       notifyListeners();
     }

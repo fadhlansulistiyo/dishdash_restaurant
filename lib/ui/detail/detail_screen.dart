@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../data/api/restaurant_detail.dart';
-import '../../data/api/restaurant_result.dart';
+import '../../data/model/restaurant_detail.dart';
+import '../../data/model/restaurant_result.dart';
 import '../../provider/detail/restaurant_detail_provider.dart';
-import '../../provider/result_state.dart';
+import '../../static/restaurant_detail_result_state.dart';
 import 'menu_list.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
@@ -25,9 +25,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider =
-          Provider.of<RestaurantDetailProvider>(context, listen: false);
-      provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
+      context
+          .read<RestaurantDetailProvider>()
+          .fetchRestaurantDetail(widget.restaurant.id ?? "");
     });
   }
 
@@ -42,18 +42,18 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           ];
         },
         body: Consumer<RestaurantDetailProvider>(
-          builder: (context, provider, _) {
-            if (provider.state == ResultState.loading ||
-                provider.reviewSubmitState == ResultState.loading) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (provider.state == ResultState.error) {
-              return _buildError(provider.message, provider);
-            } else if (provider.state == ResultState.hasData) {
-              final restaurantDetail = provider.restaurantDetail;
-              return _buildDetailScreen(restaurantDetail);
-            } else {
-              return const Center(child: Text('No details available'));
-            }
+          builder: (context, value, child) {
+            return switch (value.restaurantDetailState) {
+              RestaurantDetailLoadingState() => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              RestaurantDetailLoadedState(data: var restaurantDetail) =>
+                _buildDetailScreen(restaurantDetail),
+              RestaurantDetailErrorState(error: var message) => Center(
+                  child: _buildError(message, value),
+                ),
+              _ => const SizedBox()
+            };
           },
         ),
       ),
@@ -286,9 +286,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 8.0),
             TextField(
               controller: _nameController,
-              style: const TextStyle(
-                color: Colors.black
-              ),
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 labelText: 'Your Name',
                 border: OutlineInputBorder(
@@ -301,9 +299,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             const SizedBox(height: 12.0),
             TextField(
               controller: _reviewController,
-              style: const TextStyle(
-                  color: Colors.black
-              ),
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 labelText: 'Your Review',
                 border: OutlineInputBorder(
@@ -347,7 +343,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
       try {
         await provider.submitReview(widget.restaurant.id ?? "", name, review);
-        message = 'Review submitted successfully!';
+        message = provider.message;
         provider.fetchRestaurantDetail(widget.restaurant.id ?? "");
       } catch (e) {
         message = provider.message;

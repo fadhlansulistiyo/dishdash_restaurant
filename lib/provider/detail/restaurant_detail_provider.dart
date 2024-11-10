@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:dishdash_restaurant/provider/result_state.dart';
 import 'package:flutter/material.dart';
 import '../../data/api/api_service.dart';
-import '../../data/api/restaurant_detail.dart';
+import '../../data/model/restaurant_detail.dart';
+import '../../static/restaurant_detail_result_state.dart';
 
 class RestaurantDetailProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -10,29 +11,27 @@ class RestaurantDetailProvider extends ChangeNotifier {
   RestaurantDetailProvider({required this.apiService});
 
   late RestaurantDetail _restaurantDetail;
-  late ResultState _state;
-  ResultState _reviewSubmitState = ResultState.idle;
-  String _message = '';
-
-  String get message => _message;
   RestaurantDetail get restaurantDetail => _restaurantDetail;
-  ResultState get state => _state;
-  ResultState get reviewSubmitState => _reviewSubmitState;
+
+  RestaurantDetailResultState _restaurantDetailState = RestaurantDetailNoneState();
+  RestaurantDetailResultState get restaurantDetailState => _restaurantDetailState;
+
+  String _message = '';
+  String get message => _message;
 
   Future<void> fetchRestaurantDetail(String id) async {
     try {
-      _state = ResultState.loading;
+      _restaurantDetailState = RestaurantDetailLoadingState();
       notifyListeners();
 
-      final detail = await apiService.getRestaurantDetail(id);
-      _restaurantDetail = detail;
-      _state = ResultState.hasData;
-    } on SocketException {
-      _state = ResultState.error;
-      _message = 'No internet connection';
-    } catch (e) {
-      _state = ResultState.error;
-      _message = 'Failed to load restaurant detail';
+      final result = await apiService.getRestaurantDetail(id);
+      if (result.error) {
+        _restaurantDetailState = RestaurantDetailErrorState(result.message);
+      } else {
+        _restaurantDetailState = RestaurantDetailLoadedState(result.restaurant);
+      }
+    } on Exception catch (e) {
+      _restaurantDetailState = RestaurantDetailErrorState(e.toString());
     } finally {
       notifyListeners();
     }
@@ -40,24 +39,16 @@ class RestaurantDetailProvider extends ChangeNotifier {
 
   Future<void> submitReview(String id, String name, String review) async {
     try {
-      _reviewSubmitState = ResultState.loading;
-      notifyListeners();
-
       await apiService.addReview(id, name, review);
 
-      _reviewSubmitState = ResultState.hasData;
       _message = 'Review added successfully';
 
       await fetchRestaurantDetail(id);
 
       notifyListeners();
 
-    } on SocketException {
-      _reviewSubmitState = ResultState.error;
-      _message = 'No internet connection';
-    } catch (e) {
-      _reviewSubmitState = ResultState.error;
-      _message = 'Failed to add review';
+    } on Exception catch (e) {
+      _message = 'Error: $e';
     } finally {
       notifyListeners();
     }
