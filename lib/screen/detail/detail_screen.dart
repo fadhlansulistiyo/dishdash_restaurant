@@ -51,7 +51,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
       pinned: true,
       foregroundColor: Colors.white,
       backgroundColor: Colors.transparent,
-      actions: [_buildFavoriteIcon(context)],
+      actions: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _buildFavoriteIcon(context),
+        )
+      ],
       flexibleSpace: FlexibleSpaceBar(
         background: Hero(
           tag: widget.pictureId,
