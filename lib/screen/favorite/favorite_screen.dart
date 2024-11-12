@@ -1,12 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../provider/detail/favorite_list_provider.dart';
+import '../../provider/favorite/restaurant_database_provider.dart';
 import '../../static/navigation_route.dart';
 import '../detail/restaurant_detail_args.dart';
 import '../home/restaurant_item.dart';
 
-class FavoriteScreen extends StatelessWidget {
+class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
+
+  @override
+  State<FavoriteScreen> createState() => _FavoriteScreenState();
+}
+
+class _FavoriteScreenState extends State<FavoriteScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<RestaurantDatabaseProvider>().loadAllRestaurant();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,26 +31,26 @@ class FavoriteScreen extends StatelessWidget {
         title: const Text("Favorite List"),
         centerTitle: true,
       ),
-      body: Consumer<FavoriteListProvider>(
+      body: Consumer<RestaurantDatabaseProvider>(
         builder: (context, value, child) {
-          final favoriteList = value.favoriteList;
+          final favoriteList = value.restaurantList ?? [];
           return switch (favoriteList.isNotEmpty) {
             true => ListView.builder(
                 itemCount: favoriteList.length,
                 itemBuilder: (context, index) {
-                  final restaurantDetail = favoriteList[index];
+                  final restaurant = favoriteList[index];
                   return RestaurantItem(
-                    pictureId: restaurantDetail.pictureId,
-                    name: restaurantDetail.name,
-                    city: restaurantDetail.city,
-                    rating: restaurantDetail.rating,
+                    pictureId: restaurant.pictureId,
+                    name: restaurant.name,
+                    city: restaurant.city,
+                    rating: restaurant.rating,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
                         NavigationRoute.detailRoute.name,
                         arguments: RestaurantDetailArguments(
-                            restaurantId: restaurantDetail.id,
-                            pictureId: restaurantDetail.pictureId
+                            restaurantId: restaurant.id,
+                            pictureId: restaurant.pictureId
                         ),
                       );
                     },

@@ -1,5 +1,6 @@
 import 'package:dishdash_restaurant/provider/detail/favorite_list_provider.dart';
 import 'package:dishdash_restaurant/provider/detail/restaurant_detail_provider.dart';
+import 'package:dishdash_restaurant/provider/favorite/restaurant_database_provider.dart';
 import 'package:dishdash_restaurant/provider/main/index_nav_provider.dart';
 import 'package:dishdash_restaurant/provider/home/restaurant_provider.dart';
 import 'package:dishdash_restaurant/screen/detail/detail_screen.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'common/theme.dart';
 import 'common/util.dart';
 import 'data/api/api_service.dart';
+import 'data/local/restaurant_database_service.dart';
 
 void main() {
   runApp(MultiProvider(
@@ -29,9 +31,14 @@ void main() {
         create: (context) =>
             RestaurantDetailProvider(apiService: context.read<ApiService>()),
       ),
+      Provider(
+        create: (context) => RestaurantDatabaseService(),
+      ),
       ChangeNotifierProvider(
-        create: (context) => FavoriteListProvider(),
-      )
+        create: (context) => RestaurantDatabaseProvider(
+          context.read<RestaurantDatabaseService>(),
+        ),
+      ),
     ],
     child: const MyApp(),
   ));
@@ -53,7 +60,8 @@ class MyApp extends StatelessWidget {
       routes: {
         NavigationRoute.mainRoute.name: (context) => const MainScreen(),
         NavigationRoute.detailRoute.name: (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as RestaurantDetailArguments;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as RestaurantDetailArguments;
           return RestaurantDetailScreen(
             restaurantId: args.restaurantId,
             pictureId: args.pictureId,
