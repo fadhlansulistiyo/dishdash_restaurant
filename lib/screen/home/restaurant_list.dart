@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/home/restaurant_provider.dart';
 import '../detail/restaurant_detail_args.dart';
+import '../settings/setting_screen.dart';
 
 class RestaurantList extends StatefulWidget {
   const RestaurantList({super.key});
@@ -30,7 +31,6 @@ class _RestaurantListState extends State<RestaurantList> {
         title: _isSearching
             ? _buildSearchField()
             : const Text('DishDash Restaurant'),
-        centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
@@ -42,6 +42,26 @@ class _RestaurantListState extends State<RestaurantList> {
                   _performSearch('');
                 }
               });
+            },
+          ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (String value) {
+              if (value == 'Settings') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SettingScreen()),
+                );
+              }
+            },
+            itemBuilder: (BuildContext context) {
+              return {'Settings'}.map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
             },
           ),
         ],
@@ -56,18 +76,63 @@ class _RestaurantListState extends State<RestaurantList> {
         middle: _isSearching
             ? _buildSearchField()
             : const Text('DishDash Restaurant'),
-        trailing: GestureDetector(
-          child:
-              Icon(_isSearching ? CupertinoIcons.clear : CupertinoIcons.search),
-          onTap: () {
-            setState(() {
-              _isSearching = !_isSearching;
-              if (!_isSearching) {
-                _searchController.clear();
-                _performSearch('');
-              }
-            });
-          },
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              child: Icon(
+                _isSearching ? CupertinoIcons.clear : CupertinoIcons.search,
+              ),
+              onTap: () {
+                setState(() {
+                  _isSearching = !_isSearching;
+                  if (!_isSearching) {
+                    _searchController.clear();
+                    _performSearch('');
+                  }
+                });
+              },
+            ),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              child: const Icon(CupertinoIcons.ellipsis_vertical),
+              onPressed: () {
+                showCupertinoModalPopup(
+                  context: context,
+                  builder: (BuildContext context) => CupertinoActionSheet(
+                    title: const Text('Settings'),
+                    actions: <CupertinoActionSheetAction>[
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => const SettingScreen(),
+                            ),
+                          );
+                        },
+                        child: const Text('Settings'),
+                      ),
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Other Option'),
+                      ),
+                    ],
+                    cancelButton: CupertinoActionSheetAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      isDefaultAction: true,
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
       child: _buildList(),
@@ -115,8 +180,7 @@ class _RestaurantListState extends State<RestaurantList> {
                       NavigationRoute.detailRoute.name,
                       arguments: RestaurantDetailArguments(
                           restaurantId: restaurant.id ?? "",
-                          pictureId: restaurant.pictureId ?? ""
-                      ),
+                          pictureId: restaurant.pictureId ?? ""),
                     );
                   },
                 );
