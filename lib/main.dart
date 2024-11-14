@@ -27,25 +27,6 @@ void main() async {
   runApp(MultiProvider(
     providers: [
       Provider(
-        create: (context) => HttpService(),
-      ),
-      Provider(
-        create: (context) => LocalNotificationService(
-          context.read<HttpService>(),
-        )
-          ..init()
-          ..configureLocalTimeZone(),
-      ),
-      Provider(
-        create: (context) => NotificationPreference(prefs),
-      ),
-      ChangeNotifierProvider(
-        create: (context) => LocalNotificationProvider(
-            context.read<LocalNotificationService>(),
-            context.read<NotificationPreference>())
-          ..requestPermissions(),
-      ),
-      Provider(
         create: (context) => ApiService(),
       ),
       ChangeNotifierProvider(
@@ -72,7 +53,26 @@ void main() async {
       ),
       ChangeNotifierProvider(
         create: (context) => ThemeProvider(context.read<ThemePreference>()),
-      )
+      ),
+      Provider(
+        create: (context) => HttpService(),
+      ),
+      Provider(
+        create: (context) => LocalNotificationService(
+          context.read<HttpService>(),
+        )
+          ..init()
+          ..configureLocalTimeZone(),
+      ),
+      Provider(
+        create: (context) => NotificationPreference(prefs),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => LocalNotificationProvider(
+            context.read<LocalNotificationService>(),
+            context.read<NotificationPreference>())
+          ..requestPermissions(),
+      ),
     ],
     child: const MyApp(),
   ));

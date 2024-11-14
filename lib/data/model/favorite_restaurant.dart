@@ -17,7 +17,7 @@ class FavoriteRestaurant {
     return {
       'id': id,
       'name': name,
-      'address': city,
+      'city': city,
       'pictureId': pictureId,
       'rating': rating,
     };
@@ -27,7 +27,7 @@ class FavoriteRestaurant {
     return FavoriteRestaurant(
       id: json['id'],
       name: json['name'],
-      city: json['address'],
+      city: json['city'],
       pictureId: json['pictureId'],
       rating: json['rating'],
     );
