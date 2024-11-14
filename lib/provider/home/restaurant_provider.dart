@@ -2,13 +2,12 @@ import 'package:dishdash_restaurant/data/model/restaurant_result.dart';
 import 'package:dishdash_restaurant/static/restaurant_result_state.dart';
 import 'package:flutter/material.dart';
 import '../../data/api/api_service.dart';
+import 'package:http/http.dart' as http;
 
 class RestaurantProvider extends ChangeNotifier {
   final ApiService apiService;
 
-  RestaurantProvider({required this.apiService}) {
-    fetchAllRestaurants();
-  }
+  RestaurantProvider({required this.apiService});
 
   late RestaurantResult _restaurantResult;
   RestaurantResult get result => _restaurantResult;

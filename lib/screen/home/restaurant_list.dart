@@ -21,6 +21,17 @@ class _RestaurantListState extends State<RestaurantList> {
   bool _isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      if (mounted) {
+        context.read<RestaurantProvider>().fetchAllRestaurants();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return PlatformWidget(androidBuilder: _buildAndroid, iosBuilder: _buildIos);
   }
