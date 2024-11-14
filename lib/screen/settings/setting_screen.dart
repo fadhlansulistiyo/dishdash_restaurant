@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../provider/settings/theme_provider.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
@@ -8,11 +10,13 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  bool _isDarkTheme = false;
   bool _isNotificationEnabled = false;
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    bool isDarkTheme = themeProvider.themeMode == ThemeMode.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
@@ -23,11 +27,11 @@ class _SettingScreenState extends State<SettingScreen> {
           children: [
             SwitchListTile(
               title: const Text('Dark Theme'),
-              value: _isDarkTheme,
+              value: isDarkTheme,
               secondary: const Icon(Icons.dark_mode),
               onChanged: (bool value) {
                 setState(() {
-                  _isDarkTheme = value;
+                  themeProvider.toggleTheme(value);
                   // logic
                 });
               },
