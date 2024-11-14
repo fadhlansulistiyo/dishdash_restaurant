@@ -31,6 +31,7 @@ class _SettingScreenState extends State<SettingScreen> {
             // Dark Theme Switch
             SwitchListTile(
               title: const Text('Dark Theme'),
+              subtitle: const Text('Enable dark theme'),
               value: isDarkTheme,
               secondary: const Icon(Icons.dark_mode),
               onChanged: (bool value) {
@@ -41,6 +42,7 @@ class _SettingScreenState extends State<SettingScreen> {
             // Notification Switch
             SwitchListTile(
                 title: const Text('Daily Reminder'),
+                subtitle: const Text('Enable daily notifications at 11am'),
                 value: isNotificationEnable,
                 secondary: const Icon(Icons.notifications_active),
                 onChanged: (bool isEnabled) async {
