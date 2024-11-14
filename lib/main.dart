@@ -2,10 +2,14 @@ import 'package:dishdash_restaurant/provider/detail/restaurant_detail_provider.d
 import 'package:dishdash_restaurant/provider/favorite/restaurant_database_provider.dart';
 import 'package:dishdash_restaurant/provider/main/index_nav_provider.dart';
 import 'package:dishdash_restaurant/provider/home/restaurant_provider.dart';
+import 'package:dishdash_restaurant/provider/settings/local_notification_provider.dart';
 import 'package:dishdash_restaurant/provider/settings/theme_provider.dart';
 import 'package:dishdash_restaurant/screen/detail/detail_screen.dart';
 import 'package:dishdash_restaurant/screen/detail/restaurant_detail_args.dart';
 import 'package:dishdash_restaurant/screen/main_screen.dart';
+import 'package:dishdash_restaurant/services/http_service.dart';
+import 'package:dishdash_restaurant/services/local_notification_service.dart';
+import 'package:dishdash_restaurant/services/notification_preference.dart';
 import 'package:dishdash_restaurant/services/theme_preferences.dart';
 import 'package:dishdash_restaurant/static/navigation_route.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +26,25 @@ void main() async {
 
   runApp(MultiProvider(
     providers: [
+      Provider(
+        create: (context) => HttpService(),
+      ),
+      Provider(
+        create: (context) => LocalNotificationService(
+          context.read<HttpService>(),
+        )
+          ..init()
+          ..configureLocalTimeZone(),
+      ),
+      Provider(
+        create: (context) => NotificationPreference(prefs),
+      ),
+      ChangeNotifierProvider(
+        create: (context) => LocalNotificationProvider(
+            context.read<LocalNotificationService>(),
+            context.read<NotificationPreference>())
+          ..requestPermissions(),
+      ),
       Provider(
         create: (context) => ApiService(),
       ),
