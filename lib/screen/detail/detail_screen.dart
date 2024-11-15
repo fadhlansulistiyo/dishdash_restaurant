@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../data/model/restaurant_detail.dart';
 import '../../provider/detail/restaurant_detail_provider.dart';
 import '../../static/restaurant_detail_result_state.dart';
-import '../../provider/detail/favorite_icon_provider.dart';
 import 'favorite_icon_widget.dart';
 import 'menu_list.dart';
 
@@ -81,19 +80,16 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   }
 
   Widget _buildFavoriteIcon(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => FavoriteIconProvider(),
-      child: Consumer<RestaurantDetailProvider>(
-        builder: (context, value, child) {
-          if (value.restaurantDetailState is RestaurantDetailLoadedState) {
-            final restaurant =
-                (value.restaurantDetailState as RestaurantDetailLoadedState)
-                    .data;
-            return FavoriteIconWidget(restaurantDetail: restaurant);
-          }
-          return const SizedBox();
-        },
-      ),
+    return Consumer<RestaurantDetailProvider>(
+      builder: (context, value, child) {
+        if (value.restaurantDetailState is RestaurantDetailLoadedState) {
+          final restaurant =
+              (value.restaurantDetailState as RestaurantDetailLoadedState)
+                  .data;
+          return FavoriteIconWidget(restaurantDetail: restaurant);
+        }
+        return const SizedBox();
+      },
     );
   }
 

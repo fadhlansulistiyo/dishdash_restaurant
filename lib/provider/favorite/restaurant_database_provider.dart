@@ -16,20 +16,54 @@ class RestaurantDatabaseProvider extends ChangeNotifier {
   FavoriteRestaurant? _restaurant;
   FavoriteRestaurant? get restaurant => _restaurant;
 
+  bool _isFavorite = false;
+  bool get isFavorite => _isFavorite;
+
   Future<void> saveRestaurant(FavoriteRestaurant value) async {
     try {
       final result = await _service.insertItem(value);
-
-      final isError = result == 0;
-      if (isError) {
-        _message = "Failed to save your data";
-      } else {
+      if (result != 0) {
         _message = "Your data is saved";
+        _isFavorite = true;
+      } else {
+        _message = "Failed to save your data";
       }
     } catch (e) {
       _message = "Failed to save your data";
     }
     notifyListeners();
+  }
+
+  Future<void> removeRestaurantById(String id) async {
+    try {
+      await _service.removeItem(id);
+      _isFavorite = false;
+      _message = "Your data is removed";
+    } catch (e) {
+      _message = "Failed to remove your data";
+    }
+    notifyListeners();
+  }
+
+  Future<void> toggleFavorite(FavoriteRestaurant restaurant) async {
+    if (_isFavorite) {
+      await removeRestaurantById(restaurant.id);
+    } else {
+      await saveRestaurant(restaurant);
+    }
+  }
+
+  Future<void> loadRestaurantById(String id) async {
+    try {
+      _restaurant = await _service.getItemById(id);
+      _isFavorite = _restaurant != null && _restaurant!.id == id;
+      _message = "Your data is loaded";
+      notifyListeners();
+    } catch (e) {
+      _message = "Failed to load your data";
+      _isFavorite = false;
+      notifyListeners();
+    }
   }
 
   Future<void> loadAllRestaurant() async {
@@ -41,33 +75,5 @@ class RestaurantDatabaseProvider extends ChangeNotifier {
       _message = "Failed to load your all data";
       notifyListeners();
     }
-  }
-
-  Future<void> loadRestaurantById(String id) async {
-    try {
-      _restaurant = await _service.getItemById(id);
-      _message = "Your data is loaded";
-      notifyListeners();
-    } catch (e) {
-      _message = "Failed to load your data";
-      notifyListeners();
-    }
-  }
-
-  Future<void> removeRestaurantById(String id) async {
-    try {
-      await _service.removeItem(id);
-
-      _message = "Your data is removed";
-      notifyListeners();
-    } catch (e) {
-      _message = "Failed to remove your data";
-      notifyListeners();
-    }
-  }
-
-  bool checkItemFavorite(String id) {
-    final isSameRestaurant = _restaurant!.id == id;
-    return isSameRestaurant;
   }
 }

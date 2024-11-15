@@ -1,6 +1,5 @@
 import 'package:dishdash_restaurant/data/model/favorite_restaurant.dart';
 import 'package:dishdash_restaurant/data/model/restaurant_detail.dart';
-import 'package:dishdash_restaurant/provider/detail/favorite_icon_provider.dart';
 import 'package:dishdash_restaurant/provider/favorite/restaurant_database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,21 +20,18 @@ class _FavoriteIconWidgetState extends State<FavoriteIconWidget> {
 
     final restaurantDatabaseProvider =
         context.read<RestaurantDatabaseProvider>();
-    final favoriteIconProvider = context.read<FavoriteIconProvider>();
 
     Future.microtask(() async {
       await restaurantDatabaseProvider
           .loadRestaurantById(widget.restaurantDetail.id);
-      final value = restaurantDatabaseProvider.restaurant == null
-          ? false
-          : restaurantDatabaseProvider.restaurant!.id ==
-              widget.restaurantDetail.id;
-      favoriteIconProvider.isFavorite = value;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final restaurantDatabaseProvider =
+        context.watch<RestaurantDatabaseProvider>();
+
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
@@ -49,28 +45,17 @@ class _FavoriteIconWidgetState extends State<FavoriteIconWidget> {
         ],
       ),
       child: IconButton(
-        onPressed: () async {
-          final restaurantDatabaseProvider =
-              context.read<RestaurantDatabaseProvider>();
-          final favoriteIconProvider = context.read<FavoriteIconProvider>();
-          final isFavorite = favoriteIconProvider.isFavorite;
-
-          if (isFavorite) {
-            await restaurantDatabaseProvider
-                .removeRestaurantById(widget.restaurantDetail.id);
-          } else {
-            await restaurantDatabaseProvider.saveRestaurant(FavoriteRestaurant(
-                id: widget.restaurantDetail.id,
-                pictureId: widget.restaurantDetail.pictureId,
-                name: widget.restaurantDetail.name,
-                city: widget.restaurantDetail.city,
-                rating: widget.restaurantDetail.rating));
-          }
-          favoriteIconProvider.isFavorite = !isFavorite;
-          restaurantDatabaseProvider.loadAllRestaurant();
+        onPressed: () {
+          restaurantDatabaseProvider.toggleFavorite(FavoriteRestaurant(
+            id: widget.restaurantDetail.id,
+            pictureId: widget.restaurantDetail.pictureId,
+            name: widget.restaurantDetail.name,
+            city: widget.restaurantDetail.city,
+            rating: widget.restaurantDetail.rating,
+          ));
         },
         icon: Icon(
-          context.watch<FavoriteIconProvider>().isFavorite
+          restaurantDatabaseProvider.isFavorite
               ? Icons.favorite
               : Icons.favorite_border,
           color: Colors.red,

@@ -13,6 +13,7 @@ class FavoriteScreen extends StatefulWidget {
 }
 
 class _FavoriteScreenState extends State<FavoriteScreen> {
+  bool _isFirstLoad = true;
 
   @override
   void initState() {
@@ -22,6 +23,15 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
         context.read<RestaurantDatabaseProvider>().loadAllRestaurant();
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isFirstLoad) {
+      context.read<RestaurantDatabaseProvider>().loadAllRestaurant();
+    }
+    _isFirstLoad = false;
   }
 
   @override
@@ -39,20 +49,25 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 itemCount: favoriteList.length,
                 itemBuilder: (context, index) {
                   final restaurant = favoriteList[index];
+                  final restaurantDatabaseProvider =
+                      context.read<RestaurantDatabaseProvider>();
                   return RestaurantItem(
                     pictureId: restaurant.pictureId,
                     name: restaurant.name,
                     city: restaurant.city,
                     rating: restaurant.rating,
-                    onTap: () {
-                      Navigator.pushNamed(
+                    onTap: () async {
+                      await Navigator.pushNamed(
                         context,
                         NavigationRoute.detailRoute.name,
                         arguments: RestaurantDetailArguments(
-                            restaurantId: restaurant.id,
-                            pictureId: restaurant.pictureId
+                          restaurantId: restaurant.id,
+                          pictureId: restaurant.pictureId,
                         ),
                       );
+                      if (mounted) {
+                        restaurantDatabaseProvider.loadAllRestaurant();
+                      }
                     },
                   );
                 },
